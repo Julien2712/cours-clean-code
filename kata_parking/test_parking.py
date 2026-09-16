@@ -16,3 +16,8 @@ def test_le_montant_est_plafonne_a_18_euros_par_tranche_de_24h():
     assert calculer_prix(8 * 60) == 18.00
     assert calculer_prix(24 * 60) == 18.00
     assert calculer_prix(25 * 60) == 36.00
+
+
+def test_camion_abonne_paie_60_pourcent_du_montant():
+    assert calculer_prix(31, abonne=True) == 0.90
+    assert calculer_prix(8 * 60, abonne=True) == 10.80
