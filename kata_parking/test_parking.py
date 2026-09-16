@@ -11,3 +11,8 @@ def test_au_dela_de_30_minutes_le_tarif_est_1_5_par_demi_heure_supp():
     assert calculer_prix(60) == 1.5
     assert calculer_prix(61) == 3.0
     assert calculer_prix(120)==4.5
+
+def test_le_montant_est_plafonne_a_18_euros_par_tranche_de_24h():
+    assert calculer_prix(8 * 60) == 18.00
+    assert calculer_prix(24 * 60) == 18.00
+    assert calculer_prix(25 * 60) == 36.00
