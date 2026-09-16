@@ -13,4 +13,7 @@ def calculer_prix(duree_minutes, abonne=False, electrique=False):
     plafond = 18.0 * nb_tranches_24h
     prix = min(prix, plafond)
 
+    if abonne:
+        prix = round(prix * 0.6, 2)
+
     return prix
