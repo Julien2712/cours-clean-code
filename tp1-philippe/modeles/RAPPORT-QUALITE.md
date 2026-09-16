@@ -121,7 +121,14 @@ Rempli pendant la mission 3, sans rien corriger.
 
 | Règle | Ligne | Ce que le code fait | Ce que la règle dit |
 |---|---|---|---|
-|  |  |  |  |
+| M1 | 22, 137 | `val()` exclut les articles avec `q <= 0` (`if a["q"] > 0`) et `rapport()` exclut aussi `pu <= 0`. | La valeur du stock est la somme de toutes les quantités multipliées par le prix unitaire. |
+| M2 | 32, 63, 141 | `alerte()`, `cout()` et `rapport()` utilisent `q < seuil`, ignorant les articles au seuil (`q == seuil`). | Un article dont la quantité est égale au seuil est en alerte (`q <= seuil`). |
+| M3 | 44-45 | Soustrait la quantité au stock (`a["q"] = a["q"] - q`) avant la vérification, modifiant le stock même si la sortie est refusée. | Un mouvement de sortie dépassant le stock disponible est refusé et le stock reste inchangé. |
+| M4 | 39 | Refuse bien `q <= 0`, mais émet un `print` sur `stdout` au lieu d'une fonction de calcul pure sans effet de bord. | Un mouvement dont la quantité est nulle ou négative est refusé. |
+| M5 | 63, 65 | `cout()` utilise `n > 100` (exclut 100) et `q < seuil` (exclut l'article au seuil). | La remise de 10 % s'applique à partir de 100 unités incluses (`n >= 100`), et s'applique aux articles au seuil. |
+| M6 | 74-84 | Trie par valeur avec un tri à bulles manuel inefficace et une variable `i` inutilisée. | Le classement par valeur trie les articles par valeur de stock décroissante. |
+| M7 | 88-91 | Attrape toutes les exceptions (`except:`) quand `v == 0` et renvoie `0`. | Si aucune vente n'a eu lieu (`v == 0`), la fonction lève une erreur explicite. |
+| M8 | 123, 144, 169 | Dépend de l'horloge système (`datetime.now()`), affiche avec `print()` et écrit sur disque dans `/tmp/`. | Le rapport mensuel ne modifie aucune donnée et ne dépend d'aucune ressource extérieure lors de son calcul. |
 
 ---
 
