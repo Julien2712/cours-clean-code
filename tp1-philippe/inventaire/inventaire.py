@@ -16,14 +16,12 @@ STOCK = {}
 DERNIER = 0
 
 
-def val(arts):
-    t = 0
-    for a in arts:
-        if a["q"] > 0:
-            t = t + a["q"] * a["pu"]
-        else:
-            t = t + 0
-    return round(t, 2)
+def calculer_valeur_stock(articles):
+    valeur_stock = 0
+    for article in articles:
+        if article["q"] > 0:
+            valeur_stock += article["q"] * article["pu"]
+    return round(valeur_stock, 2)
 
 
 def alerte(arts):
