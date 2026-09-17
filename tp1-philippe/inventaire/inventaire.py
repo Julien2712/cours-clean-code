@@ -61,16 +61,22 @@ def enregistrer_mouvement_stock(article, quantite, type_mouvement=MOUVEMENT_SORT
     return True
 
 
-def cout(a):
-    if a["q"] < a["seuil"]:
-        n = a["seuil"] * FACTEUR_DE_REAPPROVISIONNEMENT - a["q"]
-        if n > QUANTITE_REAPPROVISIONNEMENT:
-            c = n * a["pu"] - n * a["pu"] * REMISE_REAPPROVISIONNEMENT
-        else:
-            c = n * a["pu"]
-        return round(c, 2)
-    else:
+def calculer_cout_reapprovisionnement(article):
+    if article["q"] >= article["seuil"]:
         return 0
+
+    quantite_a_commander = (
+        article["seuil"] * FACTEUR_DE_REAPPROVISIONNEMENT - article["q"]
+    )
+    cout_total = quantite_a_commander * article["pu"]
+
+    if quantite_a_commander > QUANTITE_REAPPROVISIONNEMENT:
+        cout_total -= cout_total * REMISE_REAPPROVISIONNEMENT
+
+    return round(cout_total, 2)
+
+cout = calculer_cout_reapprovisionnement
+
 
 
 def classer(arts):
