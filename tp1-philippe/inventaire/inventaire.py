@@ -32,28 +32,34 @@ def recuperer_article_en_alerte(articles):
     return reference_alerte
 
 
-def mouv(a, q, t="out", j=[], force=False, log=True):
+MOUVEMENT_SORTIE = "out"
+MOUVEMENT_ENTREE = "in"
+
+
+def enregistrer_mouvement_stock(
+    article, quantite, type_mouvement=MOUVEMENT_SORTIE, forcer=False
+):
     global DERNIER
-    if q <= 0:
-        if log:
-            print("quantite invalide : " + str(q))
+
+    if quantite <= 0:
         return False
-    if t == "out":
-        a["q"] = a["q"] - q
-        if a["q"] < 0:
-            if force == False:
-                if log:
-                    print("stock insuffisant pour " + a["ref"])
-                return False
-    elif t == "in":
-        a["q"] = a["q"] + q
+
+    if type_mouvement == MOUVEMENT_SORTIE:
+        article["q"] -= quantite
+        if article["q"] < 0 and not forcer:
+            return False
+    elif type_mouvement == MOUVEMENT_ENTREE:
+        article["q"] += quantite
     else:
-        if log:
-            print("type de mouvement inconnu : " + str(t))
         return False
-    DERNIER = DERNIER + 1
-    j.append({"id": DERNIER, "ref": a["ref"], "q": q, "t": t})
-    JOURNAL.append({"id": DERNIER, "ref": a["ref"], "q": q, "t": t})
+
+    DERNIER += 1
+    JOURNAL.append({
+        "id": DERNIER,
+        "ref": article["ref"],
+        "q": quantite,
+        "t": type_mouvement,
+    })
     return True
 
 
