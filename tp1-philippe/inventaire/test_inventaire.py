@@ -1,4 +1,4 @@
-from inventaire import calculer_valeur_stock, recuperer_article_en_alerte
+from inventaire import MOUVEMENT_SORTIE, calculer_valeur_stock, recuperer_article_en_alerte, enregistrer_mouvement_stock
 
 
 def test_calculer_valeur_stock_standard():
@@ -15,3 +15,9 @@ def test_recuperer_article_en_alerte():
         {"ref": "A3", "q": 5, "seuil": 2},
     ]
     assert recuperer_article_en_alerte(articles) == ["A1"]
+
+def test_enregistrer_mouvement_stock():
+    articles = [{"ref": "A1", "q": 10, "seuil": 2}]
+    assert enregistrer_mouvement_stock(articles[0], 5) == True
+    assert enregistrer_mouvement_stock(articles[0], -2) == False
+    assert enregistrer_mouvement_stock(articles[0], 15, MOUVEMENT_SORTIE, forcer=True) == True

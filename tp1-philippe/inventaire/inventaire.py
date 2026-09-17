@@ -36,9 +36,7 @@ MOUVEMENT_SORTIE = "out"
 MOUVEMENT_ENTREE = "in"
 
 
-def enregistrer_mouvement_stock(
-    article, quantite, type_mouvement=MOUVEMENT_SORTIE, forcer=False
-):
+def enregistrer_mouvement_stock(article, quantite, type_mouvement=MOUVEMENT_SORTIE, forcer=False):
     global DERNIER
 
     if quantite <= 0:
