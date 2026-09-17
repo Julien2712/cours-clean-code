@@ -2,37 +2,44 @@
 
 Support de cours et travaux pratiques.
 
-## Jour 1, clean code et TDD
-
 ```
-jour1/
-  cours-jour1.md      support Marp, 117 slides, environ 3 h
-  cours-jour1.pdf     le même, exporté
-  img/                les 6 schémas SVG utilisés dans les slides
-  demos/              les 4 démonstrations faites en direct
-tp1/
-  README.md           l'énoncé des 5 missions, environ 5 h
-  legacy/             le module à auditer et à refactoriser
-  modeles/            le squelette du rapport qualité à rendre
-  outils/             le script qui vérifie que le TDD a vraiment été fait
+jour1/                  clean code, indicateurs qualité, TDD unitaire
+  cours-jour1.md        support Marp, 118 slides, environ 3 h
+  cours-jour1.pdf       le même, exporté
+  img/                  les 6 schémas SVG
+  demos/                les 4 démonstrations faites en direct
+tp1/                    5 h, audit, TDD strict, refactoring sous tests
+  README.md             l'énoncé des 5 missions et le barème
+  legacy/               le module à auditer
+  correction/           le script qui produit la branche tp1-corrige
+  solution/             l'état final, 76 tests verts, point de départ du TP2
+  modeles/              le squelette du rapport qualité
+  outils/               vérification de l'historique TDD
+
+jour2/                  les cinq principes SOLID
+  cours-jour2.md        support Marp, 94 slides, environ 3 h
+  cours-jour2.pdf       le même, exporté
+  img/                  les 8 schémas SVG
+  demos/                les 4 démonstrations
+tp2/                    5 h, cinq violations dans un code en service
+  README.md             l'énoncé des 6 missions et le barème
+  depart/               l'application de facturation, 25 tests verts
+  modeles/              le squelette du rapport de conception
+  outils/               vérification de l'extension additive
 ```
 
 ## Projeter les slides
 
-Le support est un fichier Marp. Deux façons de l'utiliser.
+Dans VS Code avec l'extension **Marp for VS Code**, ouvrir le `.md` et lancer l'aperçu.
 
-Dans VS Code, avec l'extension **Marp for VS Code**, ouvrir `jour1/cours-jour1.md`
-et lancer l'aperçu.
-
-En ligne de commande, pour produire le PDF ou le HTML :
+En ligne de commande :
 
 ```bash
-cd jour1
+cd jour1   # ou jour2
 npx @marp-team/marp-cli cours-jour1.md --pdf --allow-local-files
-npx @marp-team/marp-cli cours-jour1.md --html --allow-local-files
 ```
 
-L'option `--allow-local-files` est obligatoire, les schémas SVG sont des fichiers locaux.
+`--allow-local-files` est obligatoire, les schémas sont des fichiers SVG locaux.
 
 ## Préparer les démonstrations
 
@@ -42,26 +49,53 @@ source .venv/bin/activate
 pip install pytest pytest-cov ruff pylint radon xenon vulture mypy pre-commit
 ```
 
-Le détail de chaque démo est dans `jour1/demos/README.md`.
+Le détail de chaque démo est dans `jourN/demos/README.md`.
 
-Répéter la démo TDD avant le cours :
-
-```bash
-cd jour1/demos/demo-tdd && ./rejouer-demo.sh && cd fizzbuzz-demo && git log --oneline
-```
-
-## Corriger le TP1
+Répéter avant le cours :
 
 ```bash
-cd tp1
-./outils/verifier-historique.sh /chemin/vers/le/depot/de/l/etudiant 3
+jour1/demos/demo-tdd/rejouer-demo.sh          # 13 commits rouge, vert, refactor
+jour2/demos/demo-ouverture/rejouer-demo.sh    # ferme, ouvert, étendu
 ```
 
-Le script contrôle la convention de commits, l'alternance rouge puis vert, l'absence de
-code de production dans les commits `red:`, et rejoue des commits `red:` tirés au hasard
-pour vérifier qu'ils sont réellement rouges.
+Le second se termine en lançant le vrai script de correction du TP2.
 
-## Jours 2 à 4
+## Le corrigé du TP1
 
-À produire : SOLID et patrons de conception, code legacy et odeurs, stratégie de tests
-complète avec CI/CD, débogage structuré et éco-conception.
+Il vit sur une branche, `tp1-corrige`, qui contient **90 commits réels** rejouant les
+cinq missions comme un étudiant les aurait faites.
+
+```bash
+git log --oneline origin/tp1-corrige
+git worktree add ../tp1-corrige tp1-corrige   # l'ouvrir a cote, sans quitter main
+```
+
+Chaque commit a été vérifié au moment où il a été créé : un `red:` qui passerait au
+vert arrête la génération. Les commits sont horodatés de 9h05 à 14h35, écart médian
+de trois minutes, sur 395 minutes. Le corrigé passe le script de correction sans
+aucun signalement.
+
+Les scripts qui produisent cette branche sont dans `tp1/correction/`, et
+`tp1/correction/README.md` liste les trois moments à montrer au tableau pendant le
+débrief.
+
+## Corriger les TP
+
+```bash
+tp1/outils/verifier-historique.sh /chemin/vers/le/depot 3
+tp2/outils/verifier-ocp.sh        /chemin/vers/le/depot
+```
+
+Le premier rejoue des commits `red:` tirés au hasard et vérifie qu'ils sont réellement
+rouges. Le second compare les étiquettes `ouverture-terminee` et `HEAD` et refuse toute
+ligne supprimée dans un fichier métier existant.
+
+## Le fil des quatre jours
+
+| Jour | Sujet | État |
+|---|---|---|
+| 1 | Craftsmanship, clean code, indicateurs, outils, TDD unitaire | fait |
+| 2 | Les cinq principes SOLID, un par un, sur une application en service | fait |
+| 3 | Code legacy, tests de caractérisation, coutures, odeurs, débogage | à produire |
+| ? | **Patrons de conception du GoF**, objectif du module encore sans créneau | à placer |
+| 4 | Stratégie de tests, intégration et bout en bout, CI/CD, éco-conception | à produire |
