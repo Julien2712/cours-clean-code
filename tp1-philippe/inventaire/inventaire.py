@@ -8,9 +8,9 @@ import math
 import random
 
 TVA = 0.2
-S = 3
-R = 0.1
-Q = 100
+FACTEUR_DE_REAPPROVISIONNEMENT = 3
+REMISE_REAPPROVISIONNEMENT = 0.1
+QUANTITE_REAPPROVISIONNEMENT = 100
 JOURNAL = []
 STOCK = {}
 DERNIER = 0
@@ -24,12 +24,12 @@ def calculer_valeur_stock(articles):
     return round(valeur_stock, 2)
 
 
-def alerte(arts):
-    l = []
-    for a in arts:
-        if a["q"] < a["seuil"]:
-            l.append(a["ref"])
-    return l
+def recuperer_article_en_alerte(articles):
+    reference_alerte = []
+    for article in articles:
+        if article["q"] < article["seuil"]:
+            reference_alerte.append(article["ref"])
+    return reference_alerte
 
 
 def mouv(a, q, t="out", j=[], force=False, log=True):
@@ -59,9 +59,9 @@ def mouv(a, q, t="out", j=[], force=False, log=True):
 
 def cout(a):
     if a["q"] < a["seuil"]:
-        n = a["seuil"] * S - a["q"]
-        if n > Q:
-            c = n * a["pu"] - n * a["pu"] * R
+        n = a["seuil"] * FACTEUR_DE_REAPPROVISIONNEMENT - a["q"]
+        if n > QUANTITE_REAPPROVISIONNEMENT:
+            c = n * a["pu"] - n * a["pu"] * REMISE_REAPPROVISIONNEMENT
         else:
             c = n * a["pu"]
         return round(c, 2)
