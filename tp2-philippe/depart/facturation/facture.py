@@ -30,21 +30,24 @@ class EmetteurDeFactures:
         self.compteur += 1
         return f"{PREFIXE_DE_NUMERO}-{emise_le.year}-{self.compteur:04d}"
 
-    def emettre(
+    def calculer (
         self,
         abonnement: Abonnement,
-        adresse: str,
         code_promo: str | None = None,
         premiere_facture: bool = False,
-    ) -> Facture:
+        ) -> Facture:
+        
         emise_le = datetime.now().date()
         facture = Facture(
             numero=self.numeroter(emise_le),
             client=abonnement.client,
             emise_le=emise_le,
             montant_ht=montant_hors_taxe(abonnement, code_promo, premiere_facture),
-            montant_ttc=montant_toutes_taxes(abonnement, code_promo, premiere_facture),
-        )
+            montant_ttc=montant_toutes_taxes(abonnement, code_promo, premiere_facture))
+        return facture
+        
+
+    def mise_en_forme(self, facture: Facture, abonnement: Abonnement) -> str:
         corps = "\n".join(
             [
                 f"Facture {facture.numero}",
@@ -55,5 +58,13 @@ class EmetteurDeFactures:
                 f"Montant TTC   : {facture.montant_ttc:.2f}",
             ]
         )
+        return corps
+    
+    def envoi_mail(self, facture: Facture, adresse: str, corps: str):
         self.passerelle.envoyer_courriel(adresse, f"Votre facture {facture.numero}", corps)
+    
+    def emettre(self, abonnement: Abonnement, adresse: str, code_promo: str | None = None, premiere_facture: bool = False) -> Facture:
+        facture = self.calculer(abonnement, code_promo, premiere_facture)
+        corps = self.mise_en_forme(facture, abonnement)
+        self.envoi_mail(facture, adresse, corps)
         return facture
