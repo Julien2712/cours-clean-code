@@ -17,22 +17,27 @@ class FormuleInconnue(ValueError):
 class CodePromoInconnu(ValueError):
     """Le code promotionnel n'existe pas."""
 
+Prix_Formule = {
+    FORMULE_ESSENTIEL: 9.0,
+    FORMULE_PRO: 19.0,
+    FORMULE_ENTREPRISE: 39.0,
+}
 
 def prix_par_poste(formule: str) -> float:
-    if formule == FORMULE_ESSENTIEL:
-        return 9.0
-    if formule == FORMULE_PRO:
-        return 19.0
-    if formule == FORMULE_ENTREPRISE:
-        return 39.0
-    raise FormuleInconnue(formule)
+    if formule not in Prix_Formule:
+        raise FormuleInconnue(formule)
+    return Prix_Formule[formule]
 
+
+Remise_Volume = [
+    (50, 0.20),
+    (10, 0.10),
+]
 
 def taux_de_remise_volume(nombre_de_postes: int) -> float:
-    if nombre_de_postes >= 50:
-        return 0.20
-    if nombre_de_postes >= 10:
-        return 0.10
+    for seuil, taux in sorted(Remise_Volume, reverse=True):
+        if nombre_de_postes >= seuil:
+            return taux
     return 0.0
 
 
