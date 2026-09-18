@@ -1,70 +1,49 @@
 """Emission des factures d'abonnement."""
 
-from dataclasses import dataclass
 from datetime import date, datetime
 
 from facturation.abonnements import Abonnement
+from facturation.document import Facture
+from facturation.numerotation import Numeroteur
 from facturation.passerelles import ClientSMTP
+from facturation.presentation import corps_de_la_facture, objet_du_courriel
 from facturation.tarifs import montant_hors_taxe, montant_toutes_taxes
-
-PREFIXE_DE_NUMERO = "FA"
-
-
-@dataclass
-class Facture:
-    numero: str
-    client: str
-    emise_le: date
-    montant_ht: float
-    montant_ttc: float
 
 
 class EmetteurDeFactures:
-    """Calcule, met en forme et envoie les factures."""
+    """Orchestre l'emission : etablir la facture, puis l'envoyer."""
 
     def __init__(self) -> None:
-        self.compteur = 0
+        self.numeroteur = Numeroteur()
         self.passerelle = ClientSMTP()
 
-    def numeroter(self, emise_le: date) -> str:
-        self.compteur += 1
-        return f"{PREFIXE_DE_NUMERO}-{emise_le.year}-{self.compteur:04d}"
-
-    def calculer (
+    def etablir(
         self,
         abonnement: Abonnement,
+        emise_le: date,
         code_promo: str | None = None,
         premiere_facture: bool = False,
-        ) -> Facture:
-        
-        emise_le = datetime.now().date()
-        facture = Facture(
-            numero=self.numeroter(emise_le),
+    ) -> Facture:
+        return Facture(
+            numero=self.numeroteur.suivant(emise_le),
             client=abonnement.client,
             emise_le=emise_le,
             montant_ht=montant_hors_taxe(abonnement, code_promo, premiere_facture),
-            montant_ttc=montant_toutes_taxes(abonnement, code_promo, premiere_facture))
-        return facture
-        
-
-    def mise_en_forme(self, facture: Facture, abonnement: Abonnement) -> str:
-        corps = "\n".join(
-            [
-                f"Facture {facture.numero}",
-                f"Client        : {facture.client}",
-                f"Emise le      : {facture.emise_le.isoformat()}",
-                f"Formule       : {abonnement.formule}, {abonnement.nombre_de_postes} postes",
-                f"Montant HT    : {facture.montant_ht:.2f}",
-                f"Montant TTC   : {facture.montant_ttc:.2f}",
-            ]
+            montant_ttc=montant_toutes_taxes(abonnement, code_promo, premiere_facture),
         )
-        return corps
-    
-    def envoi_mail(self, facture: Facture, adresse: str, corps: str):
-        self.passerelle.envoyer_courriel(adresse, f"Votre facture {facture.numero}", corps)
-    
-    def emettre(self, abonnement: Abonnement, adresse: str, code_promo: str | None = None, premiere_facture: bool = False) -> Facture:
-        facture = self.calculer(abonnement, code_promo, premiere_facture)
-        corps = self.mise_en_forme(facture, abonnement)
-        self.envoi_mail(facture, adresse, corps)
+
+    def envoyer(self, facture: Facture, abonnement: Abonnement, adresse: str) -> None:
+        self.passerelle.envoyer_courriel(
+            adresse, objet_du_courriel(facture), corps_de_la_facture(facture, abonnement)
+        )
+
+    def emettre(
+        self,
+        abonnement: Abonnement,
+        adresse: str,
+        code_promo: str | None = None,
+        premiere_facture: bool = False,
+    ) -> Facture:
+        facture = self.etablir(abonnement, datetime.now().date(), code_promo, premiere_facture)
+        self.envoyer(facture, abonnement, adresse)
         return facture
