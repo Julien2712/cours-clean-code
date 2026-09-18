@@ -1,11 +1,10 @@
 """Emission des factures d'abonnement."""
 
-from datetime import date, datetime
+from datetime import date
 
 from facturation.abonnements import Abonnement
 from facturation.document import Facture
 from facturation.numerotation import Numeroteur
-from facturation.passerelles import ClientSMTP
 from facturation.presentation import corps_de_la_facture, objet_du_courriel
 from facturation.tarifs import montant_hors_taxe, montant_toutes_taxes
 
@@ -13,9 +12,9 @@ from facturation.tarifs import montant_hors_taxe, montant_toutes_taxes
 class EmetteurDeFactures:
     """Orchestre l'emission : etablir la facture, puis l'envoyer."""
 
-    def __init__(self) -> None:
+    def __init__(self, paserelle) -> None:
         self.numeroteur = Numeroteur()
-        self.passerelle = ClientSMTP()
+        self.passerelle = paserelle
 
     def etablir(
         self,
@@ -41,9 +40,10 @@ class EmetteurDeFactures:
         self,
         abonnement: Abonnement,
         adresse: str,
+        emise_le: date,
         code_promo: str | None = None,
         premiere_facture: bool = False,
     ) -> Facture:
-        facture = self.etablir(abonnement, datetime.now().date(), code_promo, premiere_facture)
+        facture = self.etablir(abonnement, emise_le, code_promo, premiere_facture)
         self.envoyer(facture, abonnement, adresse)
         return facture

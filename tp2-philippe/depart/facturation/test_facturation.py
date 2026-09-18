@@ -3,6 +3,7 @@
 from datetime import date
 
 import pytest
+from facturation.passerelles import ClientSMTP
 
 from facturation.abonnements import (
     FORMULE_ENTREPRISE,
@@ -130,25 +131,30 @@ def test_un_abonnement_annuel_refuse_toute_resiliation():
 
 # --- l'emission -----------------------------------------------------------
 
-
 def test_le_numero_de_facture_est_incremente(capsys):
-    emetteur = EmetteurDeFactures()
-    premiere = emetteur.emettre(abonnement(), "compta@dupont.fr")
-    seconde = emetteur.emettre(abonnement(), "compta@dupont.fr")
+    # On injecte la passerelle ici :
+    emetteur = EmetteurDeFactures(ClientSMTP())
+    # On injecte la date ici :
+    premiere = emetteur.emettre(abonnement(), "compta@dupont.fr", date(2026, 1, 1))
+    seconde = emetteur.emettre(abonnement(), "compta@dupont.fr", date(2026, 1, 2))
     capsys.readouterr()
     assert premiere.numero.endswith("-0001")
     assert seconde.numero.endswith("-0002")
 
 
 def test_la_facture_porte_les_deux_montants(capsys):
-    facture = EmetteurDeFactures().emettre(abonnement(nombre_de_postes=3), "compta@dupont.fr")
+    # On injecte la passerelle et la date :
+    facture = EmetteurDeFactures(ClientSMTP()).emettre(
+        abonnement(nombre_de_postes=3), "compta@dupont.fr", date(2026, 1, 1)
+    )
     capsys.readouterr()
     assert facture.montant_ht == 57.0
     assert facture.montant_ttc == 68.4
 
 
 def test_la_facture_part_par_courriel(capsys):
-    EmetteurDeFactures().emettre(abonnement(), "compta@dupont.fr")
+    # On injecte la passerelle et la date :
+    EmetteurDeFactures(ClientSMTP()).emettre(abonnement(), "compta@dupont.fr", date(2026, 1, 1))
     sortie = capsys.readouterr().out
     assert "compta@dupont.fr" in sortie
     assert "Montant TTC" in sortie
