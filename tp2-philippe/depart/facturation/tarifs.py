@@ -17,22 +17,39 @@ class FormuleInconnue(ValueError):
 class CodePromoInconnu(ValueError):
     """Le code promotionnel n'existe pas."""
 
+# --- Points d'ouverture pour l'OCP ---
+
 Prix_Formule = {
     FORMULE_ESSENTIEL: 9.0,
     FORMULE_PRO: 19.0,
     FORMULE_ENTREPRISE: 39.0,
 }
 
+Remise_Volume = [
+    (50, 0.20),
+    (10, 0.10),
+]
+
+def _promo_bienvenue(montant: float, premiere_facture: bool) -> float:
+    if premiere_facture:
+        return max(0.0, montant - 5.0)
+    return montant
+
+def _promo_noel(montant: float, premiere_facture: bool) -> float:
+    return montant * 0.85
+
+REGLES_PROMO = {
+    "BIENVENUE": _promo_bienvenue,
+    "NOEL": _promo_noel,
+}
+
+# --- Fonctions de calcul ---
+
 def prix_par_poste(formule: str) -> float:
     if formule not in Prix_Formule:
         raise FormuleInconnue(formule)
     return Prix_Formule[formule]
 
-
-Remise_Volume = [
-    (50, 0.20),
-    (10, 0.10),
-]
 
 def taux_de_remise_volume(nombre_de_postes: int) -> float:
     for seuil, taux in sorted(Remise_Volume, reverse=True):
@@ -44,13 +61,11 @@ def taux_de_remise_volume(nombre_de_postes: int) -> float:
 def appliquer_code_promo(montant: float, code: str | None, premiere_facture: bool) -> float:
     if code is None:
         return montant
-    if code == "BIENVENUE":
-        if premiere_facture:
-            return max(0.0, montant - 5.0)
-        return montant
-    if code == "NOEL":
-        return montant * 0.85
-    raise CodePromoInconnu(code)
+    if code not in REGLES_PROMO:
+        raise CodePromoInconnu(code)
+    
+    fonction_de_calcul = REGLES_PROMO[code]
+    return fonction_de_calcul(montant, premiere_facture)
 
 
 def montant_hors_taxe(
